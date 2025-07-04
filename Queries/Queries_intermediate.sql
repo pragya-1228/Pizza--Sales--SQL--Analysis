@@ -1,60 +1,56 @@
--- 1. Find the total quantity of each pizza category ordered
+-- Join the necessary tables to find the total quantity of each pizza category ordered.
 SELECT 
-    pt.category,
-    SUM(od.quantity) AS total_quantity
+    pizza_types.category,
+    SUM(order_details.quantity) AS quantity
 FROM 
-    pizza_types pt
-    JOIN pizzas p ON pt.pizza_type_id = p.pizza_type_id
-    JOIN order_details od ON od.pizza_id = p.pizza_id
-GROUP BY 
-    pt.category
-ORDER BY 
-    total_quantity DESC;
+    pizza_types 
+    JOIN pizzas ON pizza_types.pizza_type_id = pizzas.pizza_type_id
+    JOIN order_details ON order_details.pizza_id = pizzas.pizza_id
+GROUP BY pizza_types.category 
+ORDER BY quantity DESC;
 
--- 2. Determine the distribution of orders by hour of the day
+-- Determine the distribution of orders by hour of the day.
 SELECT 
-    HOUR(order_time) AS order_hour,
-    COUNT(order_id) AS total_orders
+    HOUR(order_time) AS hour, 
+    COUNT(order_id) AS order_count
 FROM 
-    orders
+    orders 
 GROUP BY 
-    order_hour
-ORDER BY 
-    order_hour;
+    HOUR(order_time);
 
--- 3. Find the category-wise distribution of pizzas
+-- Join relevant tables to find the category-wise distribution of pizzas.
 SELECT 
-    category,
-    COUNT(name) AS pizza_count
+    category, 
+    COUNT(name) 
 FROM 
     pizza_types
 GROUP BY 
     category;
 
--- 4. Group the orders by date and calculate the average number of pizzas ordered per day
+-- Group the orders by date and calculate the average number of pizzas ordered per day.
 SELECT 
-    ROUND(AVG(quantity), 0) AS avg_pizzas_per_day
+    ROUND(AVG(quantity), 0) AS avg_pizza_order_perday 
 FROM (
     SELECT 
-        o.order_date,  
-        SUM(od.quantity) AS quantity
+        orders.order_date,  
+        SUM(order_details.quantity) AS quantity
     FROM 
-        orders o
-        JOIN order_details od ON o.order_id = od.order_id
+        orders 
+        JOIN order_details ON orders.order_id = order_details.order_id
     GROUP BY 
-        o.order_date
-) AS daily_orders;
+        orders.order_date
+) AS order_quantity;
 
--- 5. Determine the top 3 most ordered pizza types based on revenue
+-- Determine the top 3 most ordered pizza types based on revenue.
 SELECT 
-    pt.name AS pizza_name,
-    SUM(od.quantity * p.price) AS total_revenue
+    pizza_types.name, 
+    SUM(order_details.quantity * pizzas.price) AS revenue
 FROM 
-    pizza_types pt
-    JOIN pizzas p ON pt.pizza_type_id = p.pizza_type_id
-    JOIN order_details od ON od.pizza_id = p.pizza_id
+    pizza_types 
+    JOIN pizzas ON pizzas.pizza_type_id = pizza_types.pizza_type_id
+    JOIN order_details ON order_details.pizza_id = pizzas.pizza_id
 GROUP BY 
-    pt.name
+    pizza_types.name 
 ORDER BY 
-    total_revenue DESC
+    revenue DESC 
 LIMIT 3;
