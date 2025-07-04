@@ -1,47 +1,40 @@
--- 1. Retrieve the total number of orders placed
-SELECT COUNT(order_id) AS total_orders
-FROM orders;
+-- Retrieve the total number of orders placed
+SELECT COUNT(order_id) FROM orders;
 
--- 2. Calculate the total revenue generated from pizza sales
+-- Calculete the total revenues generated from pizza sales
 SELECT 
-    ROUND(SUM(od.quantity * p.price), 2) AS total_revenue
-FROM 
-    order_details od
-    JOIN pizzas p ON p.pizza_id = od.pizza_id;
+    ROUND(SUM(order_details.quantity * pizzas.price), 2) AS total_sales
+FROM
+    order_details
+    JOIN pizzas ON pizzas.pizza_id = order_details.pizza_id;
 
--- 3. Identify the highest-priced pizza
+-- Identify the highest- priced pizza.
 SELECT 
-    pt.name AS pizza_name, 
-    p.price
-FROM 
-    pizza_types pt
-    JOIN pizzas p ON pt.pizza_type_id = p.pizza_type_id
-ORDER BY 
-    p.price DESC
+    pizza_types.name, pizzas.price
+FROM
+    pizza_types
+    JOIN pizzas ON pizza_types.pizza_type_id = pizzas.pizza_type_id
+ORDER BY pizzas.price DESC
 LIMIT 1;
 
--- 4. Identify the most common pizza size ordered
+-- Identify the most common pizza ordered
 SELECT 
-    p.size,
-    COUNT(od.order_details_id) AS order_count
-FROM 
-    pizzas p
-    JOIN order_details od ON p.pizza_id = od.pizza_id
-GROUP BY 
-    p.size
-ORDER BY 
-    order_count DESC;
+    pizzas.size,
+    COUNT(order_details.order_details_id) AS order_count
+FROM
+    pizzas
+    JOIN order_details ON pizzas.pizza_id = order_details.pizza_id
+GROUP BY pizzas.size
+ORDER BY order_count DESC;
 
--- 5. List the top 5 most ordered pizza types along with their quantities
+-- List the five most ordered pizza types  along with their quantities
 SELECT 
-    pt.name AS pizza_name,
-    SUM(od.quantity) AS total_quantity
+    pizza_types.name,
+    SUM(order_details.quantity) AS quantity
 FROM 
-    pizza_types pt
-    JOIN pizzas p ON pt.pizza_type_id = p.pizza_type_id
-    JOIN order_details od ON od.pizza_id = p.pizza_id
-GROUP BY 
-    pt.name
-ORDER BY 
-    total_quantity DESC
+    pizza_types 
+    JOIN pizzas ON pizza_types.pizza_type_id = pizzas.pizza_type_id
+    JOIN order_details ON order_details.pizza_id = pizzas.pizza_id
+GROUP BY pizza_types.name
+ORDER BY quantity DESC 
 LIMIT 5;
